@@ -3,6 +3,7 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { protect } = require('../middleware/auth');
+const sendEmail = require('../utils/sendEmail');
 
 // @route   POST /api/orders
 // @desc    Create a new order
@@ -43,6 +44,53 @@ router.post('/', protect, async (req, res) => {
             shippingPrice,
             totalPrice
         });
+
+        // --- SEND EMAIL NOTIFICATION TO ADMIN ---
+        try {
+            // Build the items list for the email
+            let itemsHtml = orderItems.map(item => `
+                <li>
+                    <strong>${item.name}</strong><br>
+                    Quantity: ${item.quantity}<br>
+                    Price: $${item.price}
+                </li>
+            `).join('');
+
+            const emailHtml = `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #FF6B00;">🎉 New Order Received!</h2>
+                    <p>A new customer has just purchased items from ShopVerse.</p>
+                    
+                    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Buyer Information</h3>
+                    <p>
+                        <strong>Name:</strong> ${shippingAddress.fullName} <br>
+                        <strong>Address:</strong> ${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.postalCode}, ${shippingAddress.country} <br>
+                        <strong>User ID:</strong> ${req.user._id} <br>
+                        <strong>Email:</strong> ${req.user.email} (if populated, else check admin panel)
+                    </p>
+
+                    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 5px;">Order Details (ID: ${order._id})</h3>
+                    <ul>
+                        ${itemsHtml}
+                    </ul>
+                    
+                    <p style="font-size: 1.1em;"><strong>Total Paid (${order.paymentMethod}):</strong> <span style="color: #1a5ce4;">$${order.totalPrice.toFixed(2)}</span></p>
+                    
+                    <br>
+                    <p style="font-size: 0.9em; color: #777;">You can log in to the <a href="http://localhost:5000/admin">ShopVerse Admin Dashboard</a> to view and manage this order.</p>
+                </div>
+            `;
+
+            // Note: The user provided a typo 'gmil.com'. Defaulting here to 'gmail.com'.
+            await sendEmail({
+                email: 'majidzaffar35@gmail.com',
+                subject: `New Order Alert! - Order #${order._id.toString().slice(-8).toUpperCase()} - $${order.totalPrice.toFixed(2)}`,
+                html: emailHtml
+            });
+        } catch (emailError) {
+            console.error('Failed to send order notification email:', emailError);
+        }
+        // -----------------------------------------
 
         res.status(201).json(order);
     } catch (error) {
