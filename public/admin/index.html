@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopVerse Admin — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+    <link rel="icon" type="image/png" href="/images/Logo.png">
+</head>
+
+<body>
+
+    <!-- ═══ LOGIN OVERLAY ═══ -->
+    <div class="admin-login-overlay" id="login-overlay">
+        <div class="admin-login-card">
+            <div class="login-logo">
+                <img src="/images/Logo.png" alt="E-Commerce Shopping" class="admin-login-logo-img">
+            </div>
+            <h2>Secure Login</h2>
+            <p>Enter your admin credentials to continue</p>
+            <div id="login-error" class="admin-alert admin-alert-danger hidden"></div>
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="admin-email" placeholder="admin@shopverse.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <div class="pass-wrap">
+                    <input type="password" id="admin-password" placeholder="Enter password"
+                        autocomplete="current-password">
+                    <button type="button" onclick="toggleAdminPass(this)"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <div class="login-hint"><i class="fas fa-info-circle"></i> Demo: <strong>admin@shopverse.com</strong> /
+                <strong>admin123</strong>
+            </div>
+            <button class="admin-btn admin-btn-primary admin-btn-full" id="login-submit-btn" onclick="adminLogin()">
+                <i class="fas fa-sign-in-alt"></i> Sign In to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN DASHBOARD ═══ -->
+    <div class="admin-app hidden" id="admin-app">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="/images/Logo.png" alt="E-Commerce Shopping" class="sidebar-logo-img">
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()"><i
+                        class="fas fa-bars"></i></button>
+            </div>
+            <div class="sidebar-user" id="sidebar-user">
+                <div class="su-avatar" id="su-avatar">A</div>
+                <div class="su-info">
+                    <div class="su-name" id="su-name">Admin</div>
+                    <div class="su-role">Administrator</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+                <a href="#" class="nav-item active" data-page="dashboard" onclick="navigateAdmin('dashboard', this)">
+                    <i class="fas fa-chart-line"></i><span>Dashboard</span>
+                </a>
+                <div class="nav-section-label">Catalog</div>
+                <a href="#" class="nav-item" data-page="products" onclick="navigateAdmin('products', this)">
+                    <i class="fas fa-box-open"></i><span>Products</span>
+                    <span class="nav-badge" id="products-badge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="categories" onclick="navigateAdmin('categories', this)">
+                    <i class="fas fa-th-large"></i><span>Categories</span>
+                </a>
+                <div class="nav-section-label">Commerce</div>
+                <a href="#" class="nav-item" data-page="orders" onclick="navigateAdmin('orders', this)">
+                    <i class="fas fa-shopping-cart"></i><span>Orders</span>
+                    <span class="nav-badge nav-badge-warn" id="orders-badge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="users" onclick="navigateAdmin('users', this)">
+                    <i class="fas fa-users"></i><span>Users</span>
+                </a>
+                <div class="nav-section-label">Store</div>
+                <a href="/" target="_blank" class="nav-item">
+                    <i class="fas fa-external-link-alt"></i><span>View Store</span>
+                </a>
+                <a href="#" class="nav-item nav-item-danger" onclick="adminLogout()">
+                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="admin-main" id="admin-main">
+
+            <!-- Top Bar -->
+            <header class="admin-topbar">
+                <div class="topbar-left">
+                    <button class="topbar-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="admin-search" placeholder="Search..."
+                            oninput="handleAdminSearch(this.value)">
+                    </div>
+                    <div class="topbar-user">
+                        <div class="tu-avatar" id="tu-avatar">A</div>
+                        <span id="tu-name">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Pages -->
+            <div class="admin-pages">
+
+                <!-- ─── DASHBOARD ─── -->
+                <div class="admin-page active" id="page-dashboard">
+                    <div class="page-title-bar">
+                        <h1>Dashboard Overview</h1>
+                        <div class="page-title-actions">
+                            <button class="admin-btn admin-btn-outline admin-btn-sm" onclick="loadDashboard()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-card stat-card-primary">
+                            <div class="stat-card-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="stat-card-body">
+                                <div class="stat-card-value" id="stat-revenue">$0</div>
+                                <div class="stat-card-label">Total Revenue</div>
+                                <div class="stat-card-sub" id="stat-revenue-sub">+$0 this week</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-card-icon"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="stat-card-body">
+                                <div class="stat-card-value" id="stat-orders">0</div>
+                                <div class="stat-card-label">Total Orders</div>
+                                <div class="stat-card-sub" id="stat-orders-sub">0 processing</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-card-icon"><i class="fas fa-box-open"></i></div>
+                            <div class="stat-card-body">
+                                <div class="stat-card-value" id="stat-products">0</div>
+                                <div class="stat-card-label">Total Products</div>
+                                <div class="stat-card-sub">Across all categories</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-card-warn">
+                            <div class="stat-card-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-card-body">
+                                <div class="stat-card-value" id="stat-users">0</div>
+                                <div class="stat-card-label">Registered Users</div>
+                                <div class="stat-card-sub">Active accounts</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <!-- Order Status Breakdown -->
+                        <div class="admin-card">
+                            <div class="admin-card-header">
+                                <h3>Order Status</h3>
+                            </div>
+                            <div class="status-bars" id="status-bars">
+                                <div class="loading-row">
+                                    <div class="mini-spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Low Stock Alert -->
+                        <div class="admin-card">
+                            <div class="admin-card-header">
+                                <h3><i class="fas fa-exclamation-triangle" style="color:var(--aw)"></i> Low Stock Alert
+                                </h3>
+                                <button class="admin-btn admin-btn-sm admin-btn-outline"
+                                    onclick="navigateAdmin('products', null)">View All</button>
+                            </div>
+                            <div id="low-stock-list">
+                                <div class="loading-row">
+                                    <div class="mini-spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders -->
+                    <div class="admin-card" style="margin-top:20px">
+                        <div class="admin-card-header">
+                            <h3>Recent Orders</h3>
+                            <button class="admin-btn admin-btn-sm admin-btn-outline"
+                                onclick="navigateAdmin('orders', null)">View All</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table" id="recent-orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-orders-body">
+                                    <tr>
+                                        <td colspan="6" class="table-loading">
+                                            <div class="mini-spinner"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── PRODUCTS ─── -->
+                <div class="admin-page" id="page-products">
+                    <div class="page-title-bar">
+                        <h1>Products</h1>
+                        <button class="admin-btn admin-btn-primary" onclick="openProductModal()">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <div class="table-toolbar">
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="product-search" placeholder="Search products..."
+                                        oninput="filterProducts(this.value)">
+                                </div>
+                                <select id="product-cat-filter"
+                                    onchange="filterProducts(document.getElementById('product-search').value)">
+                                    <option value="">All Categories</option>
+                                </select>
+                            </div>
+                            <span class="table-count" id="product-count">0 products</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>ID</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Rating</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-body">
+                                    <tr>
+                                        <td colspan="7" class="table-loading">
+                                            <div class="mini-spinner"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── CATEGORIES ─── -->
+                <div class="admin-page" id="page-categories">
+                    <div class="page-title-bar">
+                        <h1>Categories</h1>
+                        <button class="admin-btn admin-btn-primary" onclick="openCategoryModal()">
+                            <i class="fas fa-plus"></i> Add Category
+                        </button>
+                    </div>
+                    <div class="categories-admin-grid" id="categories-admin-grid">
+                        <div class="loading-box">
+                            <div class="mini-spinner"></div>
+                            <p>Loading categories...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── ORDERS ─── -->
+                <div class="admin-page" id="page-orders">
+                    <div class="page-title-bar">
+                        <h1>Orders</h1>
+                        <div class="page-title-actions">
+                            <select id="order-status-filter" onchange="filterOrders()" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="order-search" placeholder="Search by customer or order ID..."
+                                    oninput="filterOrders()">
+                            </div>
+                            <span class="table-count" id="order-count">0 orders</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-table-body">
+                                    <tr>
+                                        <td colspan="8" class="table-loading">
+                                            <div class="mini-spinner"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── USERS ─── -->
+                <div class="admin-page" id="page-users">
+                    <div class="page-title-bar">
+                        <h1>Users</h1>
+                        <div class="page-title-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="user-search" placeholder="Search users..."
+                                    oninput="filterUsers(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <span class="table-count" id="user-count">0 users</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr>
+                                        <td colspan="5" class="table-loading">
+                                            <div class="mini-spinner"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /admin-pages -->
+        </div><!-- /admin-main -->
+    </div><!-- /admin-app -->
+
+    <!-- ═══ MODALS ═══ -->
+
+    <!-- Product Modal -->
+    <div class="modal-overlay hidden" id="product-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="product-modal-title">Add Product</h3>
+                <button class="modal-close" onclick="closeModal('product-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="pm-name" placeholder="e.g. Wireless Headphones">
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="pm-category">
+                            <option value="">Select category...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) *</label>
+                        <input type="number" id="pm-price" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Quantity</label>
+                        <input type="number" id="pm-stock" placeholder="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Rating (0–5)</label>
+                        <input type="number" id="pm-rating" placeholder="4.5" min="0" max="5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Reviews Count</label>
+                        <input type="number" id="pm-reviews" placeholder="0" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="pm-image" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>Description *</label>
+                    <textarea id="pm-description" rows="4" placeholder="Detailed product description..."></textarea>
+                </div>
+                <div id="pm-error" class="admin-alert admin-alert-danger hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-btn admin-btn-ghost" onclick="closeModal('product-modal')">Cancel</button>
+                <button class="admin-btn admin-btn-primary" id="pm-submit" onclick="submitProduct()">
+                    <i class="fas fa-save"></i> Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal-overlay hidden" id="category-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="category-modal-title">Add Category</h3>
+                <button class="modal-close" onclick="closeModal('category-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category Name *</label>
+                    <input type="text" id="cm-name" placeholder="e.g. Electronics">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="cm-description" rows="3" placeholder="Category description..."></textarea>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Font Awesome Icon Class</label>
+                        <input type="text" id="cm-icon" placeholder="fa-microchip">
+                    </div>
+                    <div class="form-group">
+                        <label>Color (hex)</label>
+                        <div class="color-input-wrap">
+                            <input type="color" id="cm-color-picker" value="#1a5ce4"
+                                oninput="document.getElementById('cm-color').value=this.value">
+                            <input type="text" id="cm-color" value="#1a5ce4"
+                                oninput="document.getElementById('cm-color-picker').value=this.value">
+                        </div>
+                    </div>
+                </div>
+                <div id="cm-error" class="admin-alert admin-alert-danger hidden"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-btn admin-btn-ghost" onclick="closeModal('category-modal')">Cancel</button>
+                <button class="admin-btn admin-btn-primary" id="cm-submit" onclick="submitCategory()">
+                    <i class="fas fa-save"></i> Save Category
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay hidden" id="delete-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3>Confirm Delete</h3>
+                <button class="modal-close" onclick="closeModal('delete-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-icon"><i class="fas fa-trash-alt"></i></div>
+                <p id="delete-msg" style="text-align:center;color:#475569;margin-top:12px">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="admin-btn admin-btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
+                <button class="admin-btn admin-btn-danger-solid" id="delete-confirm-btn" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="admin-toasts" id="admin-toasts"></div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+
+</html>
