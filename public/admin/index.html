@@ -20,7 +20,9 @@
     <div class="admin-login-overlay" id="login-overlay">
         <div class="admin-login-card">
             <div class="login-logo">
-                <img src="/images/Logo.png" alt="E-Commerce Shopping" class="admin-login-logo-img">
+                <img src="/images/Logo.png" alt="ShopVerse" class="admin-login-logo-img"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <div style="display:none;font-size:1.6rem;font-weight:900;color:#1a5ce4;letter-spacing:-0.5px">Shop<span style="color:#FF6B00">Verse</span></div>
             </div>
             <h2>Secure Login</h2>
             <p>Enter your admin credentials to continue</p>
@@ -53,7 +55,9 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <img src="/images/Logo.png" alt="E-Commerce Shopping" class="sidebar-logo-img">
+                    <img src="/images/Logo.png" alt="ShopVerse" class="sidebar-logo-img"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                    <span class="sidebar-logo-text" style="display:none">Shop<span style="color:#FF6B00">Verse</span></span>
                 </div>
                 <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()"><i
                         class="fas fa-bars"></i></button>
