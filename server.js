@@ -42,9 +42,17 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Global error handler — must be last middleware declared
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!', error: err.message });
+    console.error('❌ Unhandled Error:', err.stack || err.message);
+    // Guard against sending a response after headers have already been sent
+    if (res.headersSent) {
+        return next(err);
+    }
+    res.status(err.status || 500).json({
+        message: err.message || 'Something went wrong!',
+        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    });
 });
 
 // ---- Auto-Seed ----
@@ -114,12 +122,17 @@ async function autoSeed() {
 
 const PORT = process.env.PORT || 5000;
 const startServer = async () => {
-    await connectDB();
-    await autoSeed();
-    app.listen(PORT, () => {
-        console.log(`\n🚀 Store:  http://localhost:${PORT}`);
-        console.log(`🔧 Admin:  http://localhost:${PORT}/admin\n`);
-    });
+    try {
+        await connectDB();
+        await autoSeed();
+        app.listen(PORT, () => {
+            console.log(`\n🚀 Store:  http://localhost:${PORT}`);
+            console.log(`🔧 Admin:  http://localhost:${PORT}/admin\n`);
+        });
+    } catch (err) {
+        console.error('💥 Failed to start server:', err.message);
+        process.exit(1);
+    }
 };
 
 // If running locally, start the server normally

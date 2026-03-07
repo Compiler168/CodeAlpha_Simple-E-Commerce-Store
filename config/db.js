@@ -36,22 +36,27 @@ mongoose.connection.on('disconnected', () => {
 // ── Mongoose options ────────────────────────────────────────
 const CONNECT_OPTS = {
   serverSelectionTimeoutMS: 15000,   // 15 s to elect a primary
-  connectTimeoutMS: 15000,   // 15 s to open a socket
-  socketTimeoutMS: 45000,   // 45 s idle socket timeout
+  connectTimeoutMS: 15000,           // 15 s to open a socket
+  socketTimeoutMS: 45000,            // 45 s idle socket timeout
+  maxPoolSize: 10,                   // Keep connection pool reasonable for serverless
+  bufferCommands: false,             // Disable buffering — fail fast if not connected
 };
 
 // ── Main connect function ───────────────────────────────────
 const connectDB = async () => {
+  // Already connected or connecting — reuse the connection (critical for Vercel serverless)
   if (mongoose.connection.readyState >= 1) {
-    return; // Already connected, critical for Vercel serverless environment
+    return;
   }
 
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
-    console.error('❌  MONGODB_URI is not defined in your .env file.');
-    console.error('    Add it to .env:  MONGODB_URI=mongodb://...');
-    process.exit(1);
+    const msg = '❌  MONGODB_URI is not defined in your .env file.';
+    console.error(msg);
+    // Throw instead of process.exit() so the error is caught by the caller
+    // and doesn't crash the serverless function abruptly.
+    throw new Error('MONGODB_URI environment variable is not set.');
   }
 
   try {
@@ -70,19 +75,22 @@ const connectDB = async () => {
     console.error('       readWrite access on "ecommerce_store" (or Any Database)');
     console.error('    4. Verify MONGODB_URI in your .env matches the direct shard string');
     console.error('    ───────────────────────────────────────────────────────────');
-    process.exit(1);
+    // Re-throw so the caller (startServer) can handle it appropriately
+    throw err;
   }
 };
 
-// ── Graceful shutdown ───────────────────────────────────────
-const shutdown = async (signal) => {
-  console.log(`\n${signal} received — closing MongoDB connection...`);
-  await mongoose.connection.close();
-  console.log('MongoDB connection closed. Goodbye! 👋');
-  process.exit(0);
-};
+// ── Graceful shutdown (only in non-serverless environments) ─
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const shutdown = async (signal) => {
+    console.log(`\n${signal} received — closing MongoDB connection...`);
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed. Goodbye! 👋');
+    process.exit(0);
+  };
 
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+}
 
 module.exports = connectDB;
