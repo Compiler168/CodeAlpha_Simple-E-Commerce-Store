@@ -121,4 +121,15 @@ const startServer = async () => {
         console.log(`🔧 Admin:  http://localhost:${PORT}/admin\n`);
     });
 };
-startServer();
+
+// If running locally, start the server normally
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    startServer();
+} else {
+    // For Vercel Serverless environment, we just establish the DB connection
+    // and let Vercel handle the actual HTTP request listening
+    connectDB().catch(console.error);
+}
+
+// Export the Express app for Vercel
+module.exports = app;

@@ -42,6 +42,10 @@ const CONNECT_OPTS = {
 
 // ── Main connect function ───────────────────────────────────
 const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) {
+    return; // Already connected, critical for Vercel serverless environment
+  }
+
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
